@@ -527,6 +527,35 @@ void zapplayer(playerent *&d)
     DELETEP(d);
 }
 
+
+VAR(autolevel, 0, 0, 1); // Setup autolevel for my precious kids (:
+float easing_min = 0.01;
+float easing_max = 1.00;
+float easing     = 0.00;
+
+int refresh_rate = 0666;
+
+void levelAngle(playerent *&d)
+{
+    if (!autolevel) return;
+
+    unsigned int pitch = (int) d->pitch;
+
+    if (pitch > easing_max
+    && (refresh_rate < lastmillis - d->lastaction
+    && (refresh_rate < lastmillis - d->lastmove))) {
+        if (easing == 00 && pitch > 0) {
+            easing = easing_max;
+        }
+        if (easing > easing_min) {
+            easing = easing - 0.01;
+            d->pitch += easing * (d->pitch > 0 ? -1 : 1);
+        } else {
+            easing = 0.00;
+        }
+    }
+}
+
 void movelocalplayer()
 {
     if(player1->state==CS_DEAD && !player1->allowmove())
@@ -539,6 +568,7 @@ void movelocalplayer()
     }
     else if(!intermission)
     {
+        levelAngle(player1);
         moveplayer(player1, 10, true);
         checkitems(player1);
     }
